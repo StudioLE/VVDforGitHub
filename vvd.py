@@ -86,9 +86,13 @@ def install():
     subprocess.call(['7z', 'x', 'graphviz-2.38.zip', '-o' + p('graphviz'), '-aoa'])
     graphviz = os.path.abspath(p('graphviz\\release\\bin'))
     print graphviz
-    print sys.path
-    sys.path.append(graphviz)
-    print sys.path
+    # print sys.path
+    subprocess.call(['echo', '%PATH%'])
+    subprocess.call(['setx', 'path', graphviz])
+    subprocess.call(['ls', graphviz])
+    subprocess.call(['echo', '%PATH%'])
+    # sys.path.append(graphviz)
+    # print sys.path
 
     # Download & Install PyGraphviz
     # @todo If this fails then halt
