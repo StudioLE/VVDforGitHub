@@ -77,12 +77,12 @@ def install():
 
     # Download & Extract VVD
     # @todo If this fails then halt
-    # subprocess.call(['curl', '-LOk', 'https://github.com/StudioLE/VVD/archive/build.zip'])
+    subprocess.call(['curl', '-LOk', 'https://github.com/StudioLE/VVD/archive/build.zip'])
     subprocess.call(['7z', 'x', 'build.zip', '-o' + p('build'), '-aoa'])
 
     # Download & Extract Graphviz
     # @todo If this fails then halt
-    # subprocess.call(['curl', '-LOk', 'https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.zip'])
+    subprocess.call(['curl', '-LOk', 'https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.zip'])
     subprocess.call(['7z', 'x', 'graphviz-2.38.zip', '-o' + p('graphviz'), '-aoa'])
     graphviz = os.path.abspath(p('graphviz\\release\\bin'))
     print graphviz
@@ -92,9 +92,11 @@ def install():
 
     # Download & Install PyGraphviz
     # @todo If this fails then halt
-    # subprocess.call(['curl', '-LOk', 'https://download.lfd.uci.edu/pythonlibs/t4jqbe6o/pygraphviz-1.3.1-cp27-none-win32.whl'])
+    subprocess.call(['curl', '-LOk', 'https://download.lfd.uci.edu/pythonlibs/t4jqbe6o/pygraphviz-1.3.1-cp27-none-win32.whl'])
     subprocess.call(['pip', 'install', 'pygraphviz-1.3.1-cp27-none-win32.whl'])
 
+    # List directory contents
+    subprocess.call(['ls'])
 
 def prepare(file):
     """Prepare the latest and previous versions of the files to be compared."""
