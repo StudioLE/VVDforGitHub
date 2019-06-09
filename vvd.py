@@ -78,7 +78,7 @@ def install():
     # Download & Extract VVD
     # @todo If this fails then halt
     subprocess.call(['curl', '-LOk', 'https://github.com/StudioLE/VVD/archive/build.zip'])
-    subprocess.call(['7z', 'x', 'build.zip', '-o' + p('build'), '-aoa'])
+    subprocess.call(['7z', 'x', 'build.zip', '-o' + p(), '-aoa'])
 
     # Download & Extract Graphviz
     # @todo If this fails then halt
@@ -121,7 +121,7 @@ def prepare(file):
     subprocess.call(['git', 'checkout', '--', file])
 
     # Compute differences
-    # subprocess.call([p('build', 'diffgh.cmd'), previous, latest, previous + '.diff'])
+    # subprocess.call([p('VVD-build', 'diffgh.cmd'), previous, latest, previous + '.diff'])
     diff(file, previous, latest)
 
 
@@ -163,12 +163,12 @@ def diff(file, previous, latest):
     # @todo This will fail for Dynamo 2.0 graphs
     print graphToCG
     subprocess.call([
-        p('build', graphToCG),
+        p('VVD-build', graphToCG),
         previous,
         previous + '.cgx'
     ])
     subprocess.call([
-        p('build', graphToCG),
+        p('VVD-build', graphToCG),
         latest,
         latest + '.cgx'
     ])
@@ -183,7 +183,7 @@ def diff(file, previous, latest):
     # @todo I think this might fail when file contains a path
     subprocess.call([
         'python',
-        p('build', 'diffgraph.py'),
+        p('VVD-build', 'diffgraph.py'),
         previous + '.cgx',
         latest + '.cgx',
         diff
@@ -208,7 +208,7 @@ def diffToPNG(previous, diff):
     # Create a PNG of the common graph .diff file comparing it to latest
     subprocess.call([
         'python',
-        p('build', 'grapher.py'),
+        p('VVD-build', 'grapher.py'),
         previous + '.cgx',
         diff,
         diff + '.png'
