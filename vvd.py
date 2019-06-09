@@ -1,6 +1,6 @@
 #!/usr/local/bin/python
 
-import argparse, os, re, subprocess
+import argparse, os, re, subprocess, sys
 from shutil import copyfile
 
 
@@ -66,6 +66,8 @@ def install():
     print 'Preparing the environment.'
 
     # Create VVD directories
+    if not os.path.exists(p('dl')):
+        os.makedirs(p('dl'))
     if not os.path.exists(p('latest')):
         os.makedirs(p('latest'))
     if not os.path.exists(p('previous')):
@@ -73,20 +75,25 @@ def install():
 
     print 'Installing VVD and its dependencies.'
 
-    # Download VVD
+    # Download & Extract VVD
     # @todo If this fails then halt
-    subprocess.call(['curl', '-LOk', 'https://github.com/StudioLE/VVD/archive/build.zip'])
+    # subprocess.call(['curl', '-LOk', 'https://github.com/StudioLE/VVD/archive/build.zip'])
+    subprocess.call(['7z', 'x', 'build.zip', '-o' + p('build'), '-aoa'])
 
-    # Extract VVD
+    # Download & Extract Graphviz
     # @todo If this fails then halt
-    # @todo this doesn't appear to be extracting sub folders?
-    subprocess.call(['7z', 'e', 'build.zip', '-o' + p('build'), '-aoa'])
+    # subprocess.call(['curl', '-LOk', 'https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.zip'])
+    subprocess.call(['7z', 'x', 'graphviz-2.38.zip', '-o' + p('graphviz'), '-aoa'])
+    graphviz = os.path.abspath(p('graphviz\\release\\bin'))
+    print graphviz
+    print sys.path
+    sys.path.append(graphviz)
+    print sys.path
 
-    # Download Graphviz
+    # Download & Install PyGraphviz
     # @todo If this fails then halt
-
-    # Download PyGraphviz
-    # @todo If this fails then halt
+    # subprocess.call(['curl', '-LOk', 'https://download.lfd.uci.edu/pythonlibs/t4jqbe6o/pygraphviz-1.3.1-cp27-none-win32.whl'])
+    subprocess.call(['pip', 'install', 'pygraphviz-1.3.1-cp27-none-win32.whl'])
 
 
 def prepare(file):
@@ -209,6 +216,9 @@ def main():
 
     print 'Starting VVD for GitHub'
     args = parseArgs()
+
+    # Output the python version
+    subprocess.call(['python', '--version'])
 
     if(args.operation == 'run'):
         # Review changes, install dependencies, and diff each changed file.
