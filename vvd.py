@@ -87,12 +87,15 @@ def install():
     graphviz = os.path.abspath(p('graphviz\\release\\bin'))
     print graphviz
     # print sys.path
-    subprocess.call(['echo', '%PATH%'])
-    subprocess.call(['setx', 'path', graphviz])
-    subprocess.call(['ls', graphviz])
-    subprocess.call(['echo', '%PATH%'])
+    # subprocess.call(['echo', '%PATH%'])
+    # subprocess.call(['setx', 'path', graphviz])
+    # subprocess.call(['ls', graphviz])
+    # subprocess.call(['echo', '%PATH%'])
     # sys.path.append(graphviz)
     # print sys.path
+
+    # Add to path
+    subprocess.call(['cp', p('graphviz\\release\\bin' 'neato.exe'), 'C:\\Users\\appveyor\\AppData\\Roaming\\npm\\'
 
     # Download & Install PyGraphviz
     # @todo If this fails then halt
