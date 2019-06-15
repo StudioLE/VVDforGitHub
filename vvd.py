@@ -123,6 +123,9 @@ def install():
     # @todo If this fails then halt
     subprocess.call(['curl', '-LOk', 'https://download.lfd.uci.edu/pythonlibs/t4jqbe6o/pygraphviz-1.3.1-cp27-none-win32.whl'])
     subprocess.call(['pip', 'install', 'pygraphviz-1.3.1-cp27-none-win32.whl'])
+    
+    # Install PyGithub
+    subprocess.call(['pip', 'install', '--trusted-host', 'pypi.org', '--trusted-host', 'files.pythonhosted.org', 'PyGithub'])
 
     # List directory contents
     #subprocess.call(['ls'])
