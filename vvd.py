@@ -280,7 +280,8 @@ def commitDiff(file):
     subprocess.call(['git', 'checkout', '--orphan', 'vvd'])
 
     # Remove all staged files
-    subprocess.call(['git', 'rm', '-r', '--cached', '.'])
+    # @todo This causes a ton of problems. I think we need to accept that all files from master will be copied to vvd...
+    # subprocess.call(['git', 'rm', '-r', '--cached', '.'])
 
     # Checkout the branch again in case it already existed
     subprocess.call(['git', 'checkout', 'vvd'])
@@ -289,7 +290,7 @@ def commitDiff(file):
     subprocess.call(['curl', '-LOk', 'https://raw.githubusercontent.com/StudioLE/VVDforGitHub/master/vvd/.gitignore'])
 
     # Copy changes
-    subprocess.call(['cp', '-r', 'vvd-temp/diff/*', 'diff'])
+    subprocess.call(['cp', '-rv', 'vvd-temp/diff/*', 'diff'])
 
     # Git add all files. .gitignore will ensure it's only .diff and .diff.png files
     subprocess.call(['git', 'add', 'diff/'])
@@ -319,19 +320,20 @@ def commitDiff(file):
 def comment(file, graph_sha, diff_sha):
     """Post the commit to GitHub"""
 
-    # https://pygithub.readthedocs.io/en/latest/github_objects/Commit.html#github.Commit.Commit.create_comment
-
+    # Get ENV variables
     access_token = os.environ.get('GITHUB_ACCESS_TOKEN')
     user = os.environ.get('GITHUB_USER')
     repo = os.environ.get('APPVEYOR_REPO_NAME')
 
-    img = 'https://raw.githubusercontent.com/' + repo +'/' + diff_sha + '/vvd-temp/diff/' + file + '.diff.png'
-
-    # sha = 'ec7d974f81cb4dd1a0fceaf8b2f4cc36e15b18bb'
+    # Prepare the comment
+    img = 'https://raw.githubusercontent.com/' + repo +'/' + diff_sha + '/diff/' + file + '.diff.png'
     body = '[VVD for GitHub](https://github.com/StudioLE/VVDforGitHub) has calculated the following Visual Diff for `' + file + '` \n\n ![VVD Diff Graph](' + img + ')'
     position = 1
-    # path = 'example-1.3.4.dyn'
 
+    # POST to the GitHub API with PyGitHub
+    # Docs:
+    # https://pygithub.readthedocs.io/en/latest/github_objects/Commit.html#github.Commit.Commit.create_comment
+    # https://developer.github.com/v3/repos/comments/#create-a-commit-comment
     g = Github(user, access_token)
     enable_console_debug_logging()
     repo = g.get_repo(repo)
