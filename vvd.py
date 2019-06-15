@@ -30,6 +30,7 @@ def run():
     """Review changes, install dependencies, and diff each changed file."""
 
     print hr() + 'VVD run()' + hr()
+    print 'Starting by reviewing changes'
 
     # Review changes in the latest commit. Prepare a list of changed Dynamo and Grasshopper graphs.
     changed = review()
