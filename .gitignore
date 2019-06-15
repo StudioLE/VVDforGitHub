@@ -1,2 +1,5 @@
+examples/
 vvd-temp/
 .vscode
+env.py
+*.pyc
