@@ -2,8 +2,6 @@
 
 import argparse, os, re, subprocess, sys
 from shutil import copyfile
-from github import Github
-from github import enable_console_debug_logging
 
 
 def parseArgs():
@@ -322,6 +320,9 @@ def commitDiff(file):
 
 def comment(file, graph_sha, diff_sha):
     """Post the commit to GitHub"""
+    
+    from github import Github
+    from github import enable_console_debug_logging
 
     # Get ENV variables
     access_token = os.environ.get('GITHUB_ACCESS_TOKEN')
