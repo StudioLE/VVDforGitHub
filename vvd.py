@@ -2,11 +2,15 @@
 
 import argparse, os, re, subprocess, sys
 from shutil import copyfile
+from github import Github
+from github import enable_console_debug_logging
 
 
 def parseArgs():
     parser = argparse.ArgumentParser(description='VVD for GitHub')
-    parser.add_argument('operation', default='run', nargs='?', choices=['run', 'review', 'install', 'diff'], help='The operation to perform')
+    parser.add_argument('operation', default='run', nargs='?', choices=[
+        'run', 'review', 'install', 'diff', 'comment'
+    ], help='The operation to perform')
     parser.add_argument('--file', help='The file to compare if operation is diff')
     return parser.parse_args()
 
@@ -223,6 +227,7 @@ def diff(file, previous, latest):
     ])
 
     diffToPNG(previous, diff)
+    commitDiff(file)
 
 
 def diffToPNG(previous, diff):
@@ -249,6 +254,84 @@ def diffToPNG(previous, diff):
         diff + '.png'
     ])
 
+
+def commitDiff(file):
+    """Deploy .diff and .diff.png assets to GitHub"""
+
+    print hr() + 'VVD commitDiff()' + hr()
+
+    # On first deploy
+    # git checkout --orphan vvd
+    # git rm -r --cached .
+    # Create .gitignore
+
+        # On subsequent deploys
+        # git checkout vvd
+
+        # Both
+    # git add vvd-temp\
+    # git commit -m "VVD Updates"
+    # git push --set-upstream origin vvd
+    
+    # Get the SHA hash of the latest commit
+    graph_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+
+    # Checkout a new orphaned branch. If the branch already exists this will fail. That's fine.
+    subprocess.call(['git', 'checkout', '--orphan' 'vvd'])
+
+    # Remove all staged files
+    subprocess.call(['git', 'rm', '-r' '--cached', '.'])
+
+    # Checkout the branch again in case it already existed
+    subprocess.call(['git', 'checkout', 'vvd'])
+
+    # Download the .gitignore
+    subprocess.call(['curl', '-LOk', 'https://raw.githubusercontent.com/StudioLE/VVDforGitHub/vvd/.gitignore'])
+
+    # Git add all files. .gitignore will ensure it's only .diff and .diff.png files
+    subprocess.call(['git', 'checkout', 'vvd'])
+
+    # Git commit
+    subprocess.call(['git', 'commit', '-m', 'VVD Updates'])
+
+    # Get the SHA hash of the vvd diff files
+    diff_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+
+    # Git push
+    subprocess.call(['git', 'push', '--set-upstream ', 'origin', 'vvd'])
+
+    # Create a GitHub comment linking to the .diff.png
+    comment(file, graph_sha, diff_sha)
+
+
+# https://raw.githubusercontent.com/StudioLE/VVDExample/vvd/vvd-temp/diff/example-1.3.4.dyn.diff.png
+# https://raw.githubusercontent.com/StudioLE/VVDExample/1a7680c436ce0aedcd6124104ca110768ab7a4ce/vvd-temp/diff/example-1.3.4.dyn.diff.png
+
+
+def comment(file, graph_sha, diff_sha):
+    """Post the commit to GitHub"""
+
+    # https://pygithub.readthedocs.io/en/latest/github_objects/Commit.html#github.Commit.Commit.create_comment
+
+    access_token = os.environ['GITHUB_ACCESS_TOKEN']
+    user = os.environ['GITHUB_USER']
+    repo = os.environ['APPVEYOR_REPO_NAME']
+
+    img = 'https://raw.githubusercontent.com/' + repo +'/' + diff_sha + '/vvd-temp/diff/' + file + '.diff.png'
+
+    # sha = 'ec7d974f81cb4dd1a0fceaf8b2f4cc36e15b18bb'
+    body = '[VVD for GitHub](https://github.com/StudioLE/VVDforGitHub) has calculated the following Visual Diff for `' + file + '` \n\n ![VVD Diff Graph](' + img + ')'
+    position = 1
+    # path = 'example-1.3.4.dyn'
+
+    g = Github(user, access_token)
+    enable_console_debug_logging()
+    repo = g.get_repo(repo)
+    commit = repo.get_commit(graph_sha)
+    out = commit.create_comment(body, position=position, path=file)
+
+    print out
+
 def main():
 
     print hr() + 'Starting VVD for GitHub' + hr()
@@ -256,6 +339,13 @@ def main():
 
     # Output the python version
     subprocess.call(['python', '--version'])
+    
+    # Set the environment variables
+    # import env
+
+    print 'GitHub User:', os.environ['GITHUB_USER']
+    print 'GitHub Repo:', os.environ['APPVEYOR_REPO_NAME']
+    print 'GitHub Branch:', os.environ['APPVEYOR_REPO_BRANCH']
 
     if(args.operation == 'run'):
         # Review changes, install dependencies, and diff each changed file.
@@ -279,6 +369,11 @@ def main():
         # diff('example-1.3.4.dyn', 'vvd-temp\\previous\\example-1.3.4.dyn', 'vvd-temp\\latest\\example-1.3.4.dyn')
         # diff(args.file, 'vvd-temp\\previous\\' + args.file, 'vvd-temp\\latest\\' + args.file)
         prepare(args.file)
+
+    elif(args.operation == 'comment'):
+        # Prepare environment and install VVD and its dependencies.
+        comment('example-1.3.4.dyn', 'ec7d974f81cb4dd1a0fceaf8b2f4cc36e15b18bb', '1a7680c436ce0aedcd6124104ca110768ab7a4ce') 
+
     else:
         print 'Please specify a valid operation'
 
