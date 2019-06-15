@@ -35,8 +35,6 @@ def run():
     changed = review()
 
     if(changed):
-        print 'These files have been changed', changed
-
         # Prepare environment and install VVD and its dependencies.
         install()
 
@@ -81,29 +79,31 @@ def install():
     print 'Preparing the environment.'
 
     # Create VVD directories
-    if not os.path.exists(p('dl')):
-        os.makedirs(p('dl'))
-    if not os.path.exists(p('latest')):
-        os.makedirs(p('latest'))
-    if not os.path.exists(p('previous')):
-        os.makedirs(p('previous'))
+    for folder in ['dl', 'latest', 'previous', 'diff']:
+        if not os.path.exists(p(folder)):
+            os.makedirs(p(folder))
 
     print 'Installing VVD and its dependencies.'
+
+    # Change the working directory to dl
+    print p('dl')
+    # subprocess.call(['cd', ])
+    os.chdir(p('dl'))
 
     # Download & Extract VVD
     # @todo If this fails then halt
     subprocess.call(['curl', '-LOk', 'https://github.com/StudioLE/VVD/archive/build.zip'])
-    subprocess.call(['7z', 'x', 'build.zip', '-o' + p(), '-aoa'])
+    subprocess.call(['7z', 'x', 'build.zip', '-aoa'])
 
     # Download & Extract Graphviz
     # @todo If this fails then halt
     subprocess.call(['curl', '-LOk', 'https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.zip'])
-    subprocess.call(['7z', 'x', 'graphviz-2.38.zip', '-o' + p('graphviz'), '-aoa'])
+    subprocess.call(['7z', 'x', 'graphviz-2.38.zip', '-o' + 'graphviz', '-aoa'])
     
     # Add Graphviz to path
     # This is super hacky... Currently adding all graphviz binaries to the npm bin folder because it's already in %PATH%
     # @todo Add graphviz to path correctly.
-    subprocess.call(['cp', '-a', p('graphviz\\release\\bin', '.'), os.getenv('APPDATA') + '\\npm\\'])
+    subprocess.call(['cp', '-a', 'graphviz\\release\\bin\\.', os.getenv('APPDATA') + '\\npm\\'])
     # graphviz = os.path.abspath(p('graphviz\\release\\bin'))
     # print graphviz
     # print sys.path
@@ -120,7 +120,11 @@ def install():
     subprocess.call(['pip', 'install', 'pygraphviz-1.3.1-cp27-none-win32.whl'])
 
     # List directory contents
-    subprocess.call(['ls'])
+    #subprocess.call(['ls'])
+
+    # Return to the original working directory
+    # subprocess.call(['cd', '../../'])
+    os.chdir('../../')
 
 def prepare(file):
     """Prepare the latest and previous versions of the files to be compared."""
@@ -191,17 +195,17 @@ def diff(file, previous, latest):
     # @todo This will fail for Dynamo 2.0 graphs
     print 'Using executable:', graphToCG
     subprocess.call([
-        p('VVD-build', graphToCG),
+        p('dl\\VVD-build', graphToCG),
         previous,
         previous + '.cgx'
     ])
     subprocess.call([
-        p('VVD-build', graphToCG),
+        p('dl\\VVD-build', graphToCG),
         latest,
         latest + '.cgx'
     ])
 
-    diff = p('', file + '.diff')
+    diff = p('diff', file + '.diff')
     
     # Create an empty diff file
     # if not os.path.exists(diff):
@@ -211,7 +215,7 @@ def diff(file, previous, latest):
     # @todo I think this might fail when file contains a path
     subprocess.call([
         'python',
-        p('VVD-build', 'diffgraph.py'),
+        p('dl\\VVD-build', 'diffgraph.py'),
         previous + '.cgx',
         latest + '.cgx',
         diff
@@ -238,7 +242,7 @@ def diffToPNG(previous, diff):
     # Create a PNG of the common graph .diff file comparing it to latest
     subprocess.call([
         'python',
-        p('VVD-build', 'grapher.py'),
+        p('dl\\VVD-build', 'grapher.py'),
         previous + '.cgx',
         diff,
         diff + '.png'
