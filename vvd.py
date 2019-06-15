@@ -17,8 +17,19 @@ def p(folder = '', file = ''):
     temp = 'vvd-temp'
     return os.path.join(temp, folder, file)
 
+
+def hr(n = 100, character = '-'):
+    """Return a horizontal rule"""
+    hr = ''
+    for i in range(n):
+        hr += character
+    return '\n' + hr + '\n'
+
+
 def run():
     """Review changes, install dependencies, and diff each changed file."""
+
+    print hr() + 'VVD run()' + hr()
 
     # Review changes in the latest commit. Prepare a list of changed Dynamo and Grasshopper graphs.
     changed = review()
@@ -40,6 +51,8 @@ def run():
 def review():
     """Review changes in the latest commit. Prepare a list of changed Dynamo and Grasshopper graphs."""
     
+    print hr() + 'VVD review()' + hr()
+
     # Get all files changed in the last commit
     files = subprocess.check_output(['git', 'diff', '--name-only', 'HEAD', 'HEAD~1'])
     files = files.split('\n')
@@ -63,6 +76,8 @@ def review():
 def install():
     """Prepare the environment, install VVD and its dependencies."""
 
+    print hr() + 'VVD install()' + hr()
+
     print 'Preparing the environment.'
 
     # Create VVD directories
@@ -84,8 +99,13 @@ def install():
     # @todo If this fails then halt
     subprocess.call(['curl', '-LOk', 'https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.zip'])
     subprocess.call(['7z', 'x', 'graphviz-2.38.zip', '-o' + p('graphviz'), '-aoa'])
-    graphviz = os.path.abspath(p('graphviz\\release\\bin'))
-    print graphviz
+    
+    # Add Graphviz to path
+    # This is super hacky... Currently adding all graphviz binaries to the npm bin folder because it's already in %PATH%
+    # @todo Add graphviz to path correctly.
+    subprocess.call(['cp', '-a', p('graphviz\\release\\bin', '.'), os.getenv('APPDATA') + '\\npm\\'])
+    # graphviz = os.path.abspath(p('graphviz\\release\\bin'))
+    # print graphviz
     # print sys.path
     # subprocess.call(['echo', '%PATH%'])
     # subprocess.call(['setx', 'path', graphviz])
@@ -93,15 +113,6 @@ def install():
     # subprocess.call(['echo', '%PATH%'])
     # sys.path.append(graphviz)
     # print sys.path
-
-    neato = p('graphviz\\release\\bin', 'neato.exe')
-    appdata = os.getenv('APPDATA') + '\\npm\\'
-    
-    print neato
-    print appdata
-
-    # Add to path
-    subprocess.call(['cp', neato, appdata])
 
     # Download & Install PyGraphviz
     # @todo If this fails then halt
@@ -113,6 +124,8 @@ def install():
 
 def prepare(file):
     """Prepare the latest and previous versions of the files to be compared."""
+
+    print hr() + 'VVD prepare()' + hr()
 
     print 'Preparing changes in', file
 
@@ -140,6 +153,8 @@ def prepare(file):
 
 def diff(file, previous, latest):
     """Create a .diff file comparing the latest and previous graphs."""
+
+    print hr() + 'VVD diff()' + hr()
 
     # This function replaces:
     #
@@ -174,7 +189,7 @@ def diff(file, previous, latest):
 
     # Convert Graph to Common Graph format
     # @todo This will fail for Dynamo 2.0 graphs
-    print graphToCG
+    print 'Using executable:', graphToCG
     subprocess.call([
         p('VVD-build', graphToCG),
         previous,
@@ -207,6 +222,8 @@ def diff(file, previous, latest):
 
 def diffToPNG(previous, diff):
     """Create a PNG of the common graph .diff file"""
+
+    print hr() + 'VVD diffToPNG()' + hr()
     
     # vizdiffgh.cmd [gh_file] [gh_diff_file]
     #
@@ -229,7 +246,7 @@ def diffToPNG(previous, diff):
 
 def main():
 
-    print 'Starting VVD for GitHub'
+    print hr() + 'Starting VVD for GitHub' + hr()
     args = parseArgs()
 
     # Output the python version
