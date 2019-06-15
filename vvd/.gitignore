@@ -1,0 +1,5 @@
+*
+!*/
+!.gitignore
+!vvd-temp/diff/**.png
+!vvd-temp/diff/**.diff
