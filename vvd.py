@@ -353,9 +353,14 @@ def main():
 
     # Output the python version
     subprocess.call(['python', '--version'])
-    
-    # Set the environment variables
-    # import env
+
+    # If running on Appveyor
+    if(os.environ.get('APPVEYOR_BUILD_ID')):
+        subprocess.call(['git', 'config', '--global', 'user.email', os.environ.get('GIT_EMAIL')])
+        subprocess.call(['git', 'config', '--global', 'user.name', os.environ.get('GIT_USER')])
+    else:
+        # Set the environment variables
+        import env
 
     print 'GitHub User:', os.environ.get('GITHUB_USER')
     print 'GitHub Repo:', os.environ.get('APPVEYOR_REPO_NAME')
