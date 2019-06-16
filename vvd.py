@@ -303,6 +303,8 @@ def commitDiff(file):
     diff_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
 
     # Git push
+    subprocess.call(['git', 'remote', '-v'])
+    subprocess.call(['git', 'status'])
     subprocess.call(['git', 'push', '--set-upstream', 'origin', 'vvd'])
 
     # Git return to start branch
