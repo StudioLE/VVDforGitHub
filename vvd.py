@@ -305,7 +305,7 @@ def commitDiff(file):
     # Git push
     subprocess.call(['git', 'remote', '-v'])
     subprocess.call(['git', 'status'])
-    subprocess.call(['git', 'push', '--set-upstream', 'origin', 'vvd'])
+    # subprocess.call(['git', 'push', '--set-upstream', 'origin', 'vvd'])
 
     # Git return to start branch
     subprocess.call(['git', 'checkout', os.environ.get('APPVEYOR_REPO_BRANCH')])
